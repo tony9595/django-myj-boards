@@ -10,9 +10,14 @@ class Question(models.Model):
     content = models.TextField()
     create_date = models.DateTimeField()
 
+    def __str__(self):
+        return self.subject
+
 
 class Answer(models.Model):
     # 1 : N Qustion객체를 가져온다.
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(
+        Question, on_delete=models.CASCADE, related_name="answers"
+    )
     content = models.TextField()
     create_date = models.DateTimeField()

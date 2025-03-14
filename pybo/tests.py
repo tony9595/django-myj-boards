@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.db.models import Count, Sum, Avg, Min, Max
+from django.db.models import F
 from django.db.models.functions import Length  # Length를 여기에서 임포트
 
 from django.utils import timezone
@@ -113,17 +114,52 @@ class AggregateTestCase(TestCase):
 
         # null 처리
         # query = Question.objects.filter(answer__isnull=False)
-        # print(query)
 
-        if Question.objects.filter(subject="Django란?").exists():
-            print("해당 질문 존재")
+        # if Question.objects.filter(subject="Django란?").exists():
+        #     print("해당 질문 존재")
 
     # annotate @ aggregate
+
     def test_annotate(self):
-        pass
+
+        # 각 질문별 최신 답변의 날짜 가져오기
+        question = Question.objects.annotate(
+            latest_answer_date=Max("answers__create_date")
+        )
+
+        # for q in question:
+        #     print(q.subject, q.latest_answer_date)
+
+        # 각 질문별, 대답의 갯수
+        question = Question.objects.annotate(answer_count=Count("answers"))
+
+        # for q in question:
+        #     print(f"질문 : {q.subject}, 답변 개수: {q.answer_count}")
 
     def test_aggregate(self):
-        pass
+        # 답변 개수
+        answer = Answer.objects.aggregate(total_answers=Count("id"))
+        print(answer)
+
+        # 질문 개수
+        question = Question.objects.aggregate(total_questions=Count("id"))
+        print(question)
+
+        # 답변 길이 평균
+        result = Answer.objects.aggregate(avg_length=Avg(Length("content")))
+        print(result)
+
+        # 가장 오래된 질문
+        question = Question.objects.aggregate(old_question=Min("create_date"))
+        print(question)
+
+        # 5. 전체 답변 글자 수 합계 구하기
+        result = Answer.objects.aggregate(sum_length=Sum(Length("content")))
+        print(result)
+
+        # 6. 가장 긴 질문 길이 구하기
+        question = Question.objects.aggregate(long_questions=Max(Length("content")))
+        print(question)
 
     # def test_sum_answer_ids(self):
     #     """
@@ -134,3 +170,48 @@ class AggregateTestCase(TestCase):
     #     # SELECT SUM(id) FROM Answer;
     #     print(result)
     #     self.assertEqual(result["id__sum"], 15)
+
+    def test_raw(self):
+        # raw 함수 다이렉트로 sql 구문을 적을수 있도록 만든함수
+        questions = Question.objects.raw("SELECT * FROM pybo_question")
+        for question in questions:
+            print(question.id, question.subject)
+
+        # 특정 질문 가져오기 (id=1)
+        questions = Question.objects.raw(
+            "SELECT * FROM pybo_question where id = %s", [1]
+        )
+        for question in questions:
+            print(question.id, question.subject)
+
+        # 답변이 가장 많은 질문 가져오기
+        questions = Question.objects.raw(
+            """
+            SELECT q.id, q.subject, COUNT(a.id) AS answer_count
+            FROM pybo_question q
+            LEFT JOIN pybo_answer a ON q.id = a.question_id
+            GROUP BY q.id
+            ORDER BY answer_count DESC
+            LIMIT 1
+            """
+        )
+        for q in questions:
+            print(q.subject, q.answer_count)
+
+        # def test_f(self):
+        #     answer = Answer.objects.get(id=1)
+        #     answer.content =  "aaa"
+        #     answer.save()
+
+        #     answer = Answer.objects.get(id=1)
+        #     answer.content = F('content') + "aaa"
+        #     answer.save()
+
+        # #각 질문에 대해 최신 답변 날짜를 question 테이블의 필드로 업데이트
+        # # UPDATE question
+        # # SET latest_answer_date = (SELECT MAX(a.create_date)
+        # # FROM answer a
+        # # WHERE a.question_id = question.id);
+        # # F()를 사용하면 Python 메모리를 사용하지 않고, DB에서 직접 연산 수행
+        # #✅ JOIN과 GROUP BY 없이도 데이터를 효율적으로 업데이트 가능
+        Question.objects.update(latest_answer_date=F("answer__create_date"))

@@ -55,7 +55,9 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [
+            BASE_DIR / "templates"
+        ],  # DIRS 에 지정이 없을경우 => 각 앱의 하위폴더에 templates를 생성해줘야 한다.
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

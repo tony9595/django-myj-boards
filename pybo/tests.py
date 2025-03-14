@@ -171,47 +171,57 @@ class AggregateTestCase(TestCase):
     #     print(result)
     #     self.assertEqual(result["id__sum"], 15)
 
-    def test_raw(self):
-        # raw 함수 다이렉트로 sql 구문을 적을수 있도록 만든함수
-        questions = Question.objects.raw("SELECT * FROM pybo_question")
-        for question in questions:
-            print(question.id, question.subject)
+    # def test_raw(self):
+    #     # raw 함수 다이렉트로 sql 구문을 적을수 있도록 만든함수
+    #     questions = Question.objects.raw("SELECT * FROM pybo_question")
+    #     for question in questions:
+    #         print(question.id, question.subject)
 
-        # 특정 질문 가져오기 (id=1)
-        questions = Question.objects.raw(
-            "SELECT * FROM pybo_question where id = %s", [1]
-        )
-        for question in questions:
-            print(question.id, question.subject)
+    #     # 특정 질문 가져오기 (id=1)
+    #     questions = Question.objects.raw(
+    #         "SELECT * FROM pybo_question where id = %s", [1]
+    #     )
+    #     for question in questions:
+    #         print(question.id, question.subject)
 
-        # 답변이 가장 많은 질문 가져오기
-        questions = Question.objects.raw(
-            """
-            SELECT q.id, q.subject, COUNT(a.id) AS answer_count
-            FROM pybo_question q
-            LEFT JOIN pybo_answer a ON q.id = a.question_id
-            GROUP BY q.id
-            ORDER BY answer_count DESC
-            LIMIT 1
-            """
-        )
-        for q in questions:
-            print(q.subject, q.answer_count)
+    #     # 답변이 가장 많은 질문 가져오기
+    #     questions = Question.objects.raw(
+    #         """
+    #         SELECT q.id, q.subject, COUNT(a.id) AS answer_count
+    #         FROM pybo_question q
+    #         LEFT JOIN pybo_answer a ON q.id = a.question_id
+    #         GROUP BY q.id
+    #         ORDER BY answer_count DESC
+    #         LIMIT 1
+    #         """
+    #     )
+    #     for q in questions:
+    #         print(q.subject, q.answer_count)
 
-        # def test_f(self):
-        #     answer = Answer.objects.get(id=1)
-        #     answer.content =  "aaa"
-        #     answer.save()
+    #     # def test_f(self):
+    #     #     answer = Answer.objects.get(id=1)
+    #     #     answer.content =  "aaa"
+    #     #     answer.save()
 
-        #     answer = Answer.objects.get(id=1)
-        #     answer.content = F('content') + "aaa"
-        #     answer.save()
+    #     #     answer = Answer.objects.get(id=1)
+    #     #     answer.content = F('content') + "aaa"
+    #     #     answer.save()
 
-        # #각 질문에 대해 최신 답변 날짜를 question 테이블의 필드로 업데이트
-        # # UPDATE question
-        # # SET latest_answer_date = (SELECT MAX(a.create_date)
-        # # FROM answer a
-        # # WHERE a.question_id = question.id);
-        # # F()를 사용하면 Python 메모리를 사용하지 않고, DB에서 직접 연산 수행
-        # #✅ JOIN과 GROUP BY 없이도 데이터를 효율적으로 업데이트 가능
-        Question.objects.update(latest_answer_date=F("answer__create_date"))
+    #     # #각 질문에 대해 최신 답변 날짜를 question 테이블의 필드로 업데이트
+    #     # # UPDATE question
+    #     # # SET latest_answer_date = (SELECT MAX(a.create_date)
+    #     # # FROM answer a
+    #     # # WHERE a.question_id = question.id);
+    #     # # F()를 사용하면 Python 메모리를 사용하지 않고, DB에서 직접 연산 수행
+    #     # #✅ JOIN과 GROUP BY 없이도 데이터를 효율적으로 업데이트 가능
+    #     Question.objects.update(latest_answer_date=F("answer__create_date"))
+
+    def test_sum_answer_ids(self):
+        """
+        Test for Sum aggregation on answer ids
+        """
+        result = Answer.objects.aggregate(Sum("id"))
+        # SQL 쿼리:
+        # SELECT SUM(id) FROM Answer;
+        print(result)
+        self.assertEqual(result["id__sum"], 15)  # AssertionError: 15 != 16

@@ -16,8 +16,6 @@ class Question(models.Model):
 
 class Answer(models.Model):
     # 1 : N Qustion객체를 가져온다.
-    question = models.ForeignKey(
-        Question, on_delete=models.CASCADE, related_name="answers"
-    )
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
     content = models.TextField()
     create_date = models.DateTimeField()

@@ -2,7 +2,7 @@
     <ul>
         {% for question in question_list %}
             <li>
-                <a href="/pybo/{{question.id}}/">{{ question.subject }}</a>
+                {{forloop.last}}{{forloop.first}}{{forloop.counter}}:<a href="/pybo/{{question.id}}/">{{ question.subject }}</a>
             </li>
         {% endfor %}
     </ul>

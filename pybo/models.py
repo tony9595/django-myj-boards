@@ -5,6 +5,7 @@ from django.db import models
 
 # dev_2
 class Question(models.Model):
+    # 필드가 null로 저장되는 것을 허용 null=True | blank=True
     subject = models.CharField(max_length=100)
     # 글자 수에 제한이 없는 텍스트는 TextField를 사용한다
     content = models.TextField()

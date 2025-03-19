@@ -10,7 +10,7 @@ from django.core.paginator import Paginator
 
 
 def index(request):
-    page = request.Get.get("page", "1")  # 페이지
+    page = request.GET.get("page", "1")  # 페이지
 
     question_list = Question.objects.order_by("-create_date")
 

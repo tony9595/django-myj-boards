@@ -10,6 +10,9 @@ from django.core.paginator import Paginator
 
 
 def index(request):
+
+    print(request.user)
+
     page = request.GET.get("page", "1")  # 페이지
 
     question_list = Question.objects.order_by("-create_date")
@@ -62,3 +65,48 @@ def question_create(request):
 
     context = {"form": form}
     return render(request, "pybo/question_form.html", context)
+
+
+def set_cookie_view(request):
+    response = HttpResponse("쿠키가 설정되었습니다.")
+    response.set_cookie("my_cookie", "cookie_value", max_age=3600)  # 1시간 유지
+    return response
+
+
+def get_cookie_view(request):
+    cookie_value = request.COOKIES.get("my_cookie", "쿠키가없습니다.")
+    return HttpResponse(f"쿠키값:{cookie_value}")
+
+
+def delete_cookie_view(request):
+    response = HttpResponse("쿠키가 삭제되었습니다.")
+    response.delete_cookie("my_cookie")
+    return response
+
+
+def set_session_view(request):
+    request.session["username"] = "DjangoUser"
+    request.session.set_expiry(3600)
+    return HttpResponse("세션이 설정되었습니다.")
+
+
+def get_session_view(request):
+
+    from django.contrib.sessions.models import Session
+    from django.contrib.sessions.backends.db import SessionStore
+
+    # 특정 세션 키 조회
+    session_key = "s36qojk9lnuwnnc5ryy5a5ok2k86zemo"  # 실제 저장된 session_key 입력
+    session = Session.objects.get(session_key=session_key)
+
+    # 세션 데이터 복호화
+    session_data = SessionStore(session_key=session_key).load()
+    print(session_data)  # {'username': 'DjangoUser'}
+
+    username = request.session.get("username", "세션이 없습니다.")
+    return HttpResponse(f"세션값: {username}")
+
+
+def delete_session_view(request):
+    request.session.flush()
+    return HttpResponse("세션이 삭제 되었습니다.")

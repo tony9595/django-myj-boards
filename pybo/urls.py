@@ -1,33 +1,33 @@
 from django.contrib import admin
 from django.urls import path, include
 
-from pybo import views
+from pybo.views import *
 
 app_name = "pybo"
 
 urlpatterns = [
-    path("", views.index, name="index"),
-    path("<int:question_id>/", views.detail, name="detail"),
-    path("answer/create/<int:question_id>/", views.answer_create, name="answer_create"),
-    path("question/create/", views.question_create, name="question_create"),
+    path("", index, name="index"),
+    path("<int:question_id>/", detail, name="detail"),
+    path("answer/create/<int:question_id>/", answer_create, name="answer_create"),
+    path("question/create/", question_create, name="question_create"),
     path(
         "question/modify/<int:question_id>/",
-        views.question_modify,
+        question_modify,
         name="question_modify",
     ),
     path(
         "question/delete/<int:question_id>/",
-        views.question_delete,
+        question_delete,
         name="question_delete",
     ),
     path(
         "answer/modify/<int:answer_id>/",
-        views.answer_modify,
+        answer_modify,
         name="answer_modify",
     ),
     path(
         "answer/delete/<int:answer_id>/",
-        views.answer_delete,
+        answer_delete,
         name="answer_delete",
     ),
 ]

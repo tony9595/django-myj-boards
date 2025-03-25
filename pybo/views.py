@@ -148,3 +148,38 @@ def question_delete(request, question_id):
         return redirect("pybo:detail", question_id=question_id)
     question.delete()
     return redirect("pybo:index")
+
+
+# dev_18
+@login_required(login_url="common:login")
+def answer_modify(request, answer_id):
+
+    answer = get_object_or_404(Answer, pk=answer_id)
+
+    if request.user != answer.author:
+        messages.error(request, "수정 권한이 없습니다.")
+        return redirect("pybo:detail", question_id=answer.question.id)
+
+    if request.method == "POST":
+        form = AnswerForm(request.POST, instance=answer)
+
+        if form.is_valid():
+            answer = form.save(commit=False)
+            answer.modify_date = timezone.now()
+            answer.save()
+            return redirect("pybo:detail", question_id=answer.question.id)
+    else:
+        form = AnswerForm(instance=answer)
+
+    context = {"answer": answer, "form": form}
+    return render(request, "pybo/answer_form.html", context)
+
+
+@login_required(login_url="common:login")
+def answer_delete(request, answer_id):
+    answer = get_object_or_404(Answer, pk=answer_id)
+    if request.user != answer.author:
+        messages.error(request, "삭제 권한이 없습니다.")
+    else:
+        answer.delete()
+    return redirect("pybo:detail", question_id=answer.question.id)
